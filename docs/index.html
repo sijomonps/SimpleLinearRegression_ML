@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SLR – Throughput Predictor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 44px 52px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    .badge {
+      display: inline-block;
+      background: #eaf0ff;
+      color: #0f3460;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #0f3460;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 0.92rem;
+      color: #777;
+      margin-bottom: 32px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 2px solid #dce3f0;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+      color: #222;
+    }
+
+    input[type="number"]:focus { border-color: #0f3460; }
+
+    button {
+      padding: 12px 24px;
+      background: #0f3460;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    button:hover  { background: #e94560; }
+    button:active { transform: scale(0.97); }
+
+    .result-box {
+      margin-top: 28px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #eaf4ff, #f0f7ff);
+      border-left: 5px solid #0f3460;
+      display: none;
+    }
+
+    .result-box.visible { display: block; }
+
+    .result-box .label { font-size: 0.82rem; color: #666; margin-bottom: 4px; }
+    .result-box .value { font-size: 2rem; font-weight: 800; color: #0f3460; }
+    .result-box .unit  { font-size: 0.9rem; font-weight: 400; color: #555; margin-left: 4px; }
+
+    .error-box {
+      margin-top: 20px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: #fff0f0;
+      border-left: 5px solid #e94560;
+      color: #c0392b;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .formula-box {
+      margin-top: 28px;
+      background: #f8f9fc;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .formula-box code {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.95rem;
+      color: #0f3460;
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 24px;
+      font-size: 0.75rem;
+      color: #b0b8c8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">Machine Learning · SLR</div>
+    <h1>Simple Linear Regression</h1>
+    <p class="subtitle">Enter a <strong>Throughput</strong> value to predict the <strong>Response Time</strong>.</p>
+
+    <form id="form" autocomplete="off">
+      <label for="throughput">Throughput</label>
+      <div class="input-row">
+        <input type="number" id="throughput" placeholder="e.g. 150.5" step="any" required />
+        <button type="submit">Predict</button>
+      </div>
+    </form>
+
+    <div id="error" class="error-box" style="display:none;"></div>
+
+    <div id="result" class="result-box">
+      <div class="label">Predicted Response Time</div>
+      <div>
+        <span class="value" id="resultValue">—</span>
+        <span class="unit">seconds</span>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      Model equation:
+      <code>Response Time = 1.0487 + (−0.00017 × Throughput)</code>
+    </div>
+
+    <p class="footer">
+      Trained on Web_Performance.csv &nbsp;·&nbsp;
+      sklearn LinearRegression &nbsp;·&nbsp;
+      random_state=0, test_size=0.2
+    </p>
+  </div>
+
+  <script>
+    // Coefficients extracted from the trained Python model (linear_regression.py)
+    const INTERCEPT = 1.0486616932546216;
+    const COEF      = -0.00016950678942830881;
+
+    const form        = document.getElementById('form');
+    const resultBox   = document.getElementById('result');
+    const resultValue = document.getElementById('resultValue');
+    const errorBox    = document.getElementById('error');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      resultBox.classList.remove('visible');
+
+      const raw = document.getElementById('throughput').value.trim();
+      const x   = parseFloat(raw);
+
+      if (raw === '' || isNaN(x)) {
+        errorBox.textContent = 'Please enter a valid numeric value for Throughput.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      const y = INTERCEPT + COEF * x;
+      resultValue.textContent = y.toFixed(4);
+      resultBox.classList.add('visible');
+    });
+  </script>
+</body>
+</html>
