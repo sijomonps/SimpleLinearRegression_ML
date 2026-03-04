@@ -7,8 +7,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
 
+import joblib   
+
 # Load dataset
-data = pd.read_csv(r"C:\Users\sijom\OneDrive\Desktop\Marian\Sem2\ML\Colab2\Web_Performance.csv")
+data = pd.read_csv(r"./Web_Performance.csv")
 
 # Select input (X) and output (y)
 # Use 'Throughput' as X and 'Response Time(s)' as y
@@ -50,3 +52,6 @@ plt.title("Throughput vs Response Time (Test)")
 plt.xlabel("Throughput")
 plt.ylabel("Response Time (s)")
 plt.show()
+
+joblib.dump(regressor, "model.pkl")
+print("Model saved!")

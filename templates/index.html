@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Performance Predictor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .info-card .card-icon {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        .info-card h3 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #63b3ed;
+            margin-bottom: 8px;
+        }
+
+        .info-card p {
+            font-size: 13px;
+            color: #a0aec0;
+            line-height: 1.6;
+        }
+
+        .info-card .badge {
+            display: inline-block;
+            background: rgba(99, 179, 237, 0.15);
+            color: #63b3ed;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-top: 8px;
+            border: 1px solid rgba(99, 179, 237, 0.3);
+        }
+
+        /* Form */
+        .form-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-section h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #68d391;
+            margin-bottom: 18px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #a0aec0;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: #63b3ed;
+            background: rgba(99, 179, 237, 0.08);
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.15);
+        }
+
+        input[type="number"]::placeholder {
+            color: #4a5568;
+        }
+
+        button[type="submit"] {
+            padding: 13px 28px;
+            background: linear-gradient(135deg, #3182ce, #2b6cb0);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+        }
+
+        button[type="submit"]:hover {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.4);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        /* Result */
+        .result-card {
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.12), rgba(56, 178, 172, 0.12));
+            border: 1px solid rgba(72, 187, 120, 0.3);
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+            margin-bottom: 24px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card .result-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #68d391;
+            margin-bottom: 10px;
+        }
+
+        .result-card .result-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .result-card .result-unit {
+            font-size: 16px;
+            color: #68d391;
+            margin-top: 4px;
+        }
+
+        .result-card .result-desc {
+            font-size: 13px;
+            color: #a0aec0;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Interpretation bar */
+        .interpretation {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+
+        .interpretation h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #f6ad55;
+            margin-bottom: 10px;
+        }
+
+        .perf-bar-wrap {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .perf-bar {
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.8s ease;
+        }
+
+        .perf-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #4a5568;
+        }
+
+        /* How it works */
+        .how-it-works {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 18px 20px;
+        }
+
+        .how-it-works h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #b794f4;
+            margin-bottom: 12px;
+        }
+
+        .steps {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #a0aec0;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .step-num {
+            background: rgba(183, 148, 244, 0.2);
+            color: #b794f4;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="icon">&#x1F4CA;</div>
+        <h1>Web Performance Predictor</h1>
+        <p>Predict server response time from network throughput using Linear Regression</p>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="card-icon">&#x26A1;</div>
+            <h3>What is Throughput?</h3>
+            <p>
+                <strong style="color:#e2e8f0;">Throughput</strong> is the number of requests
+                a server processes per second (req/s). A higher throughput means the server
+                is under heavier load, which typically increases response time.
+            </p>
+            <span class="badge">Unit: requests / second</span>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">&#x23F1;</div>
+            <h3>What is the Output?</h3>
+            <p>
+                The model predicts the <strong style="color:#e2e8f0;">Response Time</strong>
+                — the time the server takes to reply to a single request. Lower values indicate
+                better performance.
+            </p>
+            <span class="badge">Unit: seconds</span>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-section">
+        <h3>&#x1F50D; Make a Prediction</h3>
+        <form action="/predict_web" method="post">
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <label for="throughput">Throughput (requests/second)</label>
+                    <input
+                        type="number"
+                        id="throughput"
+                        name="throughput"
+                        placeholder="e.g. 200"
+                        step="any"
+                        min="0"
+                        required
+                    >
+                </div>
+                <button type="submit">Predict &#x2192;</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Error display -->
+    {% if error %}
+    <div style="background:rgba(252,129,129,0.15);border:1px solid rgba(252,129,129,0.4);border-radius:12px;padding:16px 20px;margin-bottom:20px;color:#fc8181;">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Result -->
+    {% if prediction is not none %}
+    <div class="result-card">
+        <div class="result-label">&#x2714; Predicted Response Time</div>
+        <div class="result-value">{{ prediction }}</div>
+        <div class="result-unit">seconds</div>
+        <div class="result-desc">
+            The model estimates that at the given throughput level, the server will
+            respond in approximately <strong>{{ prediction }} seconds</strong> per request.
+        </div>
+    </div>
+
+    <!-- Performance interpretation bar -->
+    <div class="interpretation">
+        <h4>&#x1F4C8; Performance Interpretation</h4>
+        {% set pct = (prediction / 5.0 * 100) %}
+        {% if pct < 0 %}
+            {% set pct = 0 %}
+        {% elif pct > 100 %}
+            {% set pct = 100 %}
+        {% endif %}
+        {% if prediction <= 0.5 %}
+            {% set bar_color = "#68d391" %}
+            {% set perf_label = "Excellent — very fast response" %}
+        {% elif prediction <= 1.5 %}
+            {% set bar_color = "#f6e05e" %}
+            {% set perf_label = "Good — acceptable response time" %}
+        {% elif prediction <= 3.0 %}
+            {% set bar_color = "#f6ad55" %}
+            {% set perf_label = "Fair — noticeable latency" %}
+        {% else %}
+            {% set bar_color = "#fc8181" %}
+            {% set perf_label = "Poor — high latency detected" %}
+        {% endif %}
+        <div class="perf-bar-wrap">
+            <div class="perf-bar" style="width: {{ pct|round(1) }}%; background: {{ bar_color }};"></div>
+        </div>
+        <div class="perf-labels">
+            <span>0s (Fast)</span>
+            <span style="color: {{ bar_color }}; font-weight:600">{{ perf_label }}</span>
+            <span>5s+ (Slow)</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- How it works -->
+    <div class="how-it-works">
+        <h4>&#x2699; How It Works</h4>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <span>Enter the server throughput value</span>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <span>Linear Regression model processes the input</span>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <span>Predicted response time is returned</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
